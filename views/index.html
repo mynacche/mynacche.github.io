@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css?v=<%= version %>">
+</head>
+<body>
+    <div class="container">
+        <div id="player"></div>
+        <div id="wrapper">
+            <div id="scroller">
+                <div id="avatar">
+                    <img src="../static/hanjiangxue.jpg" alt="">
+                </div>
+                <table id="tb_songs" border="0" cellspacing="0">
+                    <tbody>
+                        <% songs.forEach(function(song, index){ %>
+                            <tr>
+                                <td><%= songs.length - index %></td>
+                                <td>
+                                    <%= song.songname %>
+                                </td>
+                                <td>
+                                    <% if(song.type == 'MP3') {%>
+                                        <a class="play" href="javascript:;" data-href="<%= song.src %>">试听</a>
+                                        <a  href="<%= song.src %>">下载</a>
+                                    <% }else{ %>
+                                        <a  href="<%= song.src %>">观看MV</a>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="../static/iscroll.js"></script>
+    <script src="../static/musicplayer.js"></script>
+    <script>
+        var songList = [];
+        [].slice.call(document.querySelectorAll('table a[href$=mp3]')).forEach(function(item){
+            songList.push(item.href)
+        })
+        var mp = new MusicPlayer({
+            container: document.getElementById('player'),
+            songList: songList,
+            autoplay: false
+        })
+        document.getElementById('tb_songs').onclick = function(e){
+            e = e || window.event
+            var target = e.target || e.srcElement,
+                href = target.getAttribute('data-href')
+            if(href){
+                mp.autoplay = true
+                mp.playByIndex(songList.indexOf(href))
+                mp.switchPlayBtn('play')
+            }
+        }
+    </script>
+    <script>
+        myScroll = new IScroll('#wrapper', {
+            startY: -140,
+            bounceTime: 300,
+            mouseWheel: true
+        });
+        myScroll.on('scrollEnd', function(){
+            this.y >= -140 && this.scrollTo(0, -140, 800)
+        })
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "//hm.baidu.com/hm.js?d2663479c9de1b01cbc8485ab8cb623d";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</body>
+</html>
