@@ -2,7 +2,7 @@ var changba = require('./lib/changba.js')
 var ls = require('./lib/localstorage.js')
 var jsdom = require("jsdom")
 var fs = require("fs")
-var ejs = require('ejs')
+var crypto = require('crypto')
 var jquery = fs.readFileSync("./node_modules/jquery/dist/jquery.js", "utf-8")
 
 var uid = process.argv[2] || '242071630'
@@ -44,9 +44,10 @@ function getSongsPath(songs) {
         promises.push(getSongPath(song, index))
     })
     Promise.all(promises).then((songs) => {
-        renderFile(songs)
+        //renderFile(songs)
         ls.saveStorage(localStorageFile, songs)
         console.log(`\n共计${songs.length}首`)
+        fs.writeFileSync('./src/data.js', 'module.exports=' + JSON.stringify(songs), 'utf-8')
     })
 }
 
@@ -81,8 +82,22 @@ function renderFile(songs) {
     ejs.renderFile('views/index.html', {
         title: '聆听笛箫 - 寒江雪🎵',
         songs: songs,
-        version: Math.random().toString(16).slice(-6)
-    }, function(err, result) {
+        version: fileMD5('./static/style.css')
+    }, (err, result) => {
         fs.writeFile('s/index.html', result, 'utf-8')
     })
+}
+function fileMD5(path, callback) {
+    var hash = crypto.createHash('md5');
+    if (callback && typeof callback == 'function') {
+        fs.readFile(path, (err, result) => {
+            if (err) {
+                callback(err, null);
+            } else {
+                callback(null, hash.update(result).digest('hex'));
+            }
+        })
+    } else {
+        return hash.update(fs.readFileSync(path)).digest('hex');
+    }
 }
